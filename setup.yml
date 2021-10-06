@@ -1,0 +1,61 @@
+---
+- name: Setup ubuntu Environment
+  hosts: localhost
+  remote_user: root
+  roles:
+    - role: geerlingguy.docker
+      become: yes
+      become_user: root
+
+  vars_files:
+    - defaults/main.yml
+
+  tasks:
+    - name: Test we can connect as root for setup
+      ansible.builtin.ping:
+      become: yes
+      become_user: root
+
+    - name: setup sudoless access
+      lineinfile:
+        path: /etc/sudoers
+        line: "pinkman    ALL=(ALL) NOPASSWD:ALL"
+      become: yes
+      become_user: root
+
+    - name: Install synergy packages
+      apt:
+        state: fixed
+        name:
+          - libqt5core5a
+          - libqt5dbus5
+          - libqt5gui5
+          - libqt5gui5-gles
+          - libqt5network5
+          - libqt5widgets5
+      become: yes
+      become_user: root
+
+
+    - name: Install virtualization packages
+      apt:
+        state: present
+        name:
+          - qemu-kvm
+          - qemu
+          - libvirt-clients
+          - libvirt-daemon-system
+          - bridge-utils
+          - vagrant
+          - ebtables
+          - dnsmasq-base
+          - libxslt-dev
+          - libxml2-dev
+          - libvirt-dev
+          - zlib1g-dev
+          - ruby-dev
+          - libguestfs-tools
+          - ruby-libvirt
+      become: yes
+      become_user: root
+
