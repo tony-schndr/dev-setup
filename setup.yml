@@ -1,14 +1,7 @@
 ---
-- name: Setup ubuntu Environment
+- name: Setup Environment
   hosts: localhost
   remote_user: root
-  roles:
-    - role: geerlingguy.docker
-      become: yes
-      become_user: root
-
-  vars_files:
-    - defaults/main.yml
 
   tasks:
     - name: Test we can connect as root for setup
@@ -22,19 +15,20 @@
         line: "pinkman    ALL=(ALL) NOPASSWD:ALL"
       become: yes
       become_user: root
+    
+    - name: setup global git config
+      command:
+        cmd: "{{ item }}"
+      with_items:
+        - git config --global user.email "tonyschndr@gmail.com"
+        - git config --global user.name "Tony Schneider"     
 
-    - name: Install synergy packages
-      apt:
-        state: fixed
-        name:
-          - libqt5core5a
-          - libqt5dbus5
-          - libqt5gui5
-          - libqt5gui5-gles
-          - libqt5network5
-          - libqt5widgets5
-      become: yes
-      become_user: root
+    - name: setup vimrc
+      copy:
+        dest: ~/.vimrc
+        content: |
+          au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
+          autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
 
     - name: Install virtualization packages
@@ -58,4 +52,11 @@
           - ruby-libvirt
       become: yes
       become_user: root
+      when: ansible_os_family == 'Debian' 
 
+    - name: install yum-utils
+      yum:
+        name: yum-utils
+        state: latest
+      become: yes
+      become_user: root
